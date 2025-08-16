@@ -32,10 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
         
     } catch (Exception $e) {
         $error = $e->getMessage();
+        // Store error in session to show via SweetAlert
+        $_SESSION['login_error'] = $error;
+        header('Location: login.php');
+        exit();
     }
 }
-?>
 
+// Check for error from redirect
+$showErrorAlert = isset($_SESSION['login_error']);
+$errorMessage = $showErrorAlert ? $_SESSION['login_error'] : '';
+unset($_SESSION['login_error']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,10 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
             <h1 class="login-title">Welcome back</h1>
             <p class="login-subtitle">Sign in to your account to continue</p>
         </div>
-
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
 
         <form class="login-form" id="loginForm" method="post">
             <button type="button" class="btn btn-google" id="google-login-btn" onclick="signInWithGoogle()">
@@ -109,6 +113,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Show error alert if there's an error message
+        <?php if ($showErrorAlert): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: '<?php echo addslashes($errorMessage); ?>',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        });
+        <?php endif; ?>
+
         // Toggle password visibility
         function togglePassword() {
             const passwordInput = document.getElementById('password');
