@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
         ];
         
         // Redirect to dashboard or home page
-        header('Location: dashboard.php');
+        header('Location: home.php');
         exit();
         
     } catch (Exception $e) {
