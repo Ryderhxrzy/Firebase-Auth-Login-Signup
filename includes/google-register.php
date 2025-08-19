@@ -27,6 +27,25 @@ try {
     
     $isNewUser = isset($input['isNewUser']) ? $input['isNewUser'] : false;
     
+    // Check if user already exists in Firestore with different auth provider
+    $existingUserQuery = $firestore->collection('users')->where('email', '=', $user->email)->limit(1);
+    $existingUsers = $existingUserQuery->documents();
+    
+    if (!$existingUsers->isEmpty()) {
+        $existingUser = $existingUsers->rows()[0];
+        $existingUserData = $existingUser->data();
+        
+        // If user exists with email provider, don't allow Google signup
+        if ($existingUserData['auth_provider'] === 'email' && $isNewUser) {
+            throw new Exception('An account with this email already exists. Please sign in with your email and password instead.');
+        }
+        
+        // If user exists with Google provider, just sign them in
+        if ($existingUserData['auth_provider'] === 'google') {
+            $isNewUser = false; // Override to prevent duplicate creation
+        }
+    }
+    
     // If this is a new user, create their document in Firestore
     if ($isNewUser) {
         $userData = [
@@ -40,6 +59,12 @@ try {
         
         // Store user data in Firestore
         $firestore->collection('users')->document($uid)->set($userData);
+    } else {
+        // Update last login time for existing users
+        $firestore->collection('users')->document($uid)->update([
+            ['path' => 'last_login', 'value' => new DateTime()],
+            ['path' => 'updated_at', 'value' => new DateTime()]
+        ]);
     }
     
     // Store user in session

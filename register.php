@@ -52,6 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
     }
     
     try {
+        // First check if user already exists in Firestore (could be Google user)
+        $existingUserQuery = $firestore->collection('users')->where('email', '=', $email)->limit(1);
+        $existingUsers = $existingUserQuery->documents();
+        
+        if (!$existingUsers->isEmpty()) {
+            $existingUser = $existingUsers->rows()[0];
+            $existingUserData = $existingUser->data();
+            
+            if ($existingUserData['auth_provider'] === 'google') {
+                throw new Exception('An account with this email already exists. Please sign in with Google or use a different email address.');
+            } else {
+                throw new Exception('An account with this email already exists. Please sign in instead.');
+            }
+        }
+        
         // Create user with Firebase Authentication
         $userRecord = $auth->createUserWithEmailAndPassword($email, $password);
         $uid = $userRecord->uid;
@@ -202,6 +217,14 @@ unset($_SESSION['form_data']);
             <div class="divider"><span>or</span></div>
 
             <div class="form-group">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="form-input" 
+                       placeholder="Enter your full name" 
+                       value="<?php echo htmlspecialchars($formData['full_name'] ?? ''); ?>" 
+                       required>
+            </div>
+
+            <div class="form-group">
                 <label for="email" class="form-label">Email address</label>
                 <input type="email" id="email" name="email" class="form-input" 
                        placeholder="Enter your email" 
@@ -256,6 +279,13 @@ unset($_SESSION['form_data']);
                     </button>
                 </div>
                 <div id="password-match-message" style="font-size: 12px; margin-top: 4px; display: none;"></div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="terms" id="terms" required>
+                    I agree to the <a href="terms.php" target="_blank">Terms of Service</a> and <a href="privacy.php" target="_blank">Privacy Policy</a>
+                </label>
             </div>
 
             <button type="submit" class="btn btn-primary" id="register-btn">
