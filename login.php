@@ -26,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
             'photoUrl' => $user->photoUrl ?? ''
         ];
         
-        // Redirect to dashboard or home page
         header('Location: home.php');
         exit();
         
