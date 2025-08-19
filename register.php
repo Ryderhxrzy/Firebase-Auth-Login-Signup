@@ -67,7 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
             'full_name' => $fullName,
             'profile_picture' => '',
             'created_at' => new DateTime(),
-            'updated_at' => new DateTime()
+            'updated_at' => new DateTime(),
+            'auth_provider' => 'email'
         ];
         
         $firestore->collection('users')->document($uid)->set($userData);

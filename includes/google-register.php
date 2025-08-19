@@ -33,6 +33,8 @@ try {
             'email' => $user->email,
             'full_name' => $user->displayName ?? '',
             'profile_picture' => $user->photoUrl ?? '',
+            'created_at' => new DateTime(),
+            'updated_at' => new DateTime(),
             'auth_provider' => 'google'
         ];
         
