@@ -1,5 +1,4 @@
 <?php
-
 use Kreait\Firebase\Factory;
 use Dotenv\Dotenv;
 
@@ -56,17 +55,3 @@ $firebaseConfig = [
     'appId' => $_ENV['FIREBASE_APP_ID'] ?? null
 ];
 ?>
-
-<!-- Firebase SDK for client-side -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<script>
-    // Initialize Firebase
-    const firebaseConfig = <?php echo json_encode($firebaseConfig, JSON_UNESCAPED_SLASHES); ?>;
-    
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-</script>

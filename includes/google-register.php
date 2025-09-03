@@ -49,12 +49,10 @@ try {
     // If this is a new user, create their document in Firestore
     if ($isNewUser) {
         $userData = [
+            'auth_provider' => 'google',
             'email' => $user->email,
             'full_name' => $user->displayName ?? '',
-            'profile_picture' => $user->photoUrl ?? '',
-            'created_at' => new Google\Cloud\Core\Timestamp(new DateTime()),
-            'updated_at' => new Google\Cloud\Core\Timestamp(new DateTime()),
-            'auth_provider' => 'google'
+            'profile_picture' => $user->photoUrl ?? ''
         ];
         
         // Store user data in Firestore
