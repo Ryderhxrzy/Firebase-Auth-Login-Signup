@@ -52,19 +52,16 @@ try {
             'email' => $user->email,
             'full_name' => $user->displayName ?? '',
             'profile_picture' => $user->photoUrl ?? '',
-            'created_at' => new DateTime(),
-            'updated_at' => new DateTime(),
+            'created_at' => new Google\Cloud\Core\Timestamp(new DateTime()),
+            'updated_at' => new Google\Cloud\Core\Timestamp(new DateTime()),
             'auth_provider' => 'google'
         ];
         
         // Store user data in Firestore
         $firestore->collection('users')->document($uid)->set($userData);
     } else {
-        // Update last login time for existing users
-        $firestore->collection('users')->document($uid)->update([
-            ['path' => 'last_login', 'value' => new DateTime()],
-            ['path' => 'updated_at', 'value' => new DateTime()]
-        ]);
+        // For existing Google users, just proceed with login
+        // No database update needed
     }
     
     // Store user in session

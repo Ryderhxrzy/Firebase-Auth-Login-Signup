@@ -76,13 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
             'displayName' => $fullName
         ]);
         
-        // Store additional user data in Firestore
+        // Store additional user data in Firestore - Removed timestamps
         $userData = [
             'email' => $email,
             'full_name' => $fullName,
             'profile_picture' => '',
-            'created_at' => new DateTime(),
-            'updated_at' => new DateTime(),
             'auth_provider' => 'email'
         ];
         
@@ -94,6 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_P
         exit();
         
     } catch (Exception $e) {
+        // FIX: Delete the Firebase Auth user if it was created but Firestore failed
+        if (isset($uid)) {
+            try {
+                $auth->deleteUser($uid);
+            } catch (Exception $deleteError) {
+                // Log the error but don't show it to the user
+                error_log("Failed to delete user after registration error: " . $deleteError->getMessage());
+            }
+        }
+        
         $error = $e->getMessage();
         
         // Handle specific Firebase errors
@@ -124,6 +132,7 @@ unset($_SESSION['register_errors']);
 $formData = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
 unset($_SESSION['form_data']);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -468,6 +477,7 @@ unset($_SESSION['form_data']);
         });
 
         // Google Sign-Up
+        // Google Sign-Up
         function signUpWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             
@@ -482,7 +492,7 @@ unset($_SESSION['form_data']);
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({ 
-                            idToken: user.getIdToken(),
+                            idToken: await user.getIdToken(),
                             isNewUser: result.additionalUserInfo.isNewUser
                         })
                     });
